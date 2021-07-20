@@ -4,9 +4,8 @@ A simple Todo app build to get started with React Native.
 
 ### pic/screenshots
 
-![](./assets/Images/pic1.png)
-
-![](./assets/Images/pic2.png)
+<img src="./assets/Images/pic1.png" alt="pic" width="200"/>
+<img src="./assets/Images/pic2.png" alt="pic" width="200"/>
 
 This is a [React Native](https://reactnative.dev/) project bootstrapped with [`expo init my-app`](https://docs.expo.io/get-started/create-a-new-app/).
 
