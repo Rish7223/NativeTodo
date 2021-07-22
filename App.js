@@ -1,88 +1,82 @@
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  Pressable,
-  Image,
-  Keyboard,
-} from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { StyleSheet, Text, View, Keyboard, Pressable } from 'react-native';
+
+import EmptyState from './components/EmptyState';
+import InputModal from './components/InputModal';
+import ListView from './components/ListView';
+import * as vectorIcons from '@expo/vector-icons';
+
+const isPresent = (value, list) => {
+  const newList = list.filter(
+    (data) => data.value.toLowerCase() === value.toLowerCase()
+  );
+  if (newList.length > 0) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
 export default function App() {
   const [taskText, setTaskText] = useState('');
   const [taskList, setTaskList] = useState([]);
   const [error, setError] = useState('');
+  const [isVisible, setIsVisible] = useState(false);
 
   const taskInputHandler = (text) => {
     setTaskText(text);
   };
 
   const handelAddTask = () => {
-    if (taskText !== '') {
-      setTaskList([taskText, ...taskList]);
+    if (taskText !== '' && !isPresent(taskText, taskList)) {
+      setTaskList([{ key: taskText, value: taskText }, ...taskList]);
       setError('Task added successfully.');
       Keyboard.dismiss();
       setTaskText('');
+      setIsVisible(false);
     } else {
-      setError('Empty task string error!!!');
+      setError('Empty or similar task string error!!!');
     }
   };
 
   const handleDeleteTask = (text) => {
-    const newList = taskList.filter((data) => data !== text);
+    const newList = taskList.filter((data) => data.value !== text);
     setTaskList(newList);
-    setError('Task Deleted successfully.');
   };
 
   useEffect(() => {
     if (error.length > 0) {
       setTimeout(() => {
         setError('');
-      }, 5000);
+      }, 3000);
     }
   }, [error]);
 
   return (
     <View style={styles.container}>
-      <View style={styles.actionContainer}>
-        <TextInput
-          placeholder="Enter Task ..."
-          style={styles.inputComponent}
-          onChangeText={taskInputHandler}
-          value={taskText}
-        />
-        <Pressable style={styles.button} onPress={handelAddTask}>
-          {/* <Text style={styles.text}>Add</Text> */}
-          <MaterialIcons name="add" size={20} color="white" />
+      <Text style={styles.heading}>NativeTodo</Text>
+      <Text style={styles.para}>A task management app</Text>
+      <InputModal
+        handelAddTask={handelAddTask}
+        taskInputHandler={taskInputHandler}
+        taskText={taskText}
+        isVisible={isVisible}
+        setIsVisible={setIsVisible}
+        error={error}
+      />
+      {taskList.length !== 0 ? (
+        <ListView taskList={taskList} handleDeleteTask={handleDeleteTask} />
+      ) : (
+        <EmptyState />
+      )}
+
+      <View style={{ position: 'absolute', bottom: 10, left: '50%' }}>
+        <Pressable style={styles.add} onPress={() => setIsVisible(true)}>
+          <vectorIcons.MaterialIcons name="add" size={30} color="white" />
         </Pressable>
       </View>
-      <View style={styles.listContainer}>
-        {taskList.length !== 0 ? (
-          taskList.map((textValue) => (
-            <Pressable
-              key={textValue}
-              style={styles.list}
-              onPress={() => handleDeleteTask(textValue)}
-            >
-              <Text>{textValue}</Text>
-            </Pressable>
-          ))
-        ) : (
-          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-            <Image
-              source={require('./assets/Images/page.png')}
-              style={{ height: 250, width: 180, opacity: 0.7 }}
-            />
-            <Text style={{ marginTop: 10, fontSize: 16 }}>
-              You have not created any task yet
-            </Text>
-          </View>
-        )}
-      </View>
 
-      {error !== '' && <Text style={styles.error}>{error}</Text>}
+      {/* {error !== '' && <Text style={styles.error}>{error}</Text>} */}
     </View>
   );
 }
@@ -91,66 +85,36 @@ const styles = StyleSheet.create({
   container: {
     paddingLeft: 30,
     paddingRight: 30,
-    paddingTop: 50,
+    paddingTop: 80,
     paddingBottom: 10,
     height: '100%',
   },
 
-  actionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 40,
+  heading: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  para: {
+    color: '#353535aa',
+    fontSize: 16,
   },
 
-  button: {
-    flexDirection: 'row',
+  add: {
+    height: 60,
+    width: 60,
+    backgroundColor: '#353535',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    elevation: 3,
-    backgroundColor: 'black',
-  },
-  text: {
-    fontSize: 14,
-    lineHeight: 21,
-    fontWeight: 'bold',
-    letterSpacing: 0.25,
-    color: 'white',
-  },
-
-  inputComponent: {
-    borderBottomWidth: 1,
-    borderColor: '#353535',
-    marginBottom: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 1,
-    height: '100%',
-    width: '70%',
-  },
-
-  listContainer: {
-    marginTop: 50,
-    flexDirection: 'column',
-  },
-
-  list: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#35353577',
-    marginBottom: 10,
+    borderRadius: 100,
+    zIndex: 10,
+    elevation: 5,
   },
 
   error: {
     position: 'absolute',
-    bottom: 10,
-    right: 5,
-    backgroundColor: '#eeeeee',
+    top: 40,
+    right: 10,
+    backgroundColor: '#eeeeee77',
     color: 'black',
     borderRadius: 10,
     paddingHorizontal: 30,
